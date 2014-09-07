@@ -1,0 +1,30 @@
+{
+    "name": "avoo/elo",
+    "type": "symfony-bundle",
+    "description": "Elo calculator library",
+    "keywords": ["Elo", "rewards", "competition", "points"],
+    "license": "MIT",
+    "require": {
+        "php": ">=5.3.3"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "*"
+    },
+    "authors": [
+        {
+            "name": "Jérémy Jégou",
+            "email": "jejevovo@gmail.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "autoload": {
+        "psr-4": {
+            "Avoo\\Elo\\" : ""
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "0.1-dev"
+        }
+    }
+}
