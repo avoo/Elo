@@ -53,6 +53,10 @@ abstract class AbstractElo implements EloInterface
      */
     protected $eloB;
 
+    protected $percentA;
+
+    protected $percentB;
+
     /**
      * @var EloPlayerInterface $elo1
      */
@@ -205,10 +209,17 @@ abstract class AbstractElo implements EloInterface
      */
     public function calculate($winner, $scoreA = null, $scoreB = null)
     {
+        //@todo update parameters, set playerA, playerB and remove it into construct
+
         $this->setWinner($winner);
 
+        //@todo add class for calculate exp
         $experienceA = $this->calculateExperience();
         $experienceB = $this->calculateExperience(true);
+
+        $this->percentA = round($experienceA * 100, 2);
+        $this->percentB = round($experienceB * 100, 2);
+        /******/
 
         $estimateA = $this->estimateRange();
         $estimateB = $this->estimateRange(true);
