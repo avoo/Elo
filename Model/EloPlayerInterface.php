@@ -46,20 +46,4 @@ interface EloPlayerInterface
      * @return integer
      */
     public function getElo();
-
-    /**
-     * Set difference points after calculate elo
-     *
-     * @param integer $difference
-     *
-     * @return $this
-     */
-    public function setDifference($difference);
-
-    /**
-     * Get difference points
-     *
-     * @return integer
-     */
-    public function getDifference();
 } 
