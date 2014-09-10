@@ -26,7 +26,7 @@
 
 namespace Avoo\Elo\Model;
 
-use Symfony\Component\HttpKernel\Exception\PreconditionFailedHttpException;
+use Avoo\Elo\Configuration\ConfigurationInterface;
 
 /**
  * @author Jérémy Jégou <jejeavo@gmail.com>
@@ -34,215 +34,105 @@ use Symfony\Component\HttpKernel\Exception\PreconditionFailedHttpException;
 abstract class AbstractElo implements EloInterface
 {
     /**
-     * @var integer $baseRange
+     * @var ConfigurationInterface $configuration
      */
-    protected $baseRange = 30;
+    protected $configuration;
 
     /**
-     * @var integer $floor
+     * @var EloAggregationInterface $aggregation
      */
-    protected $floor = 500;
-
-    /**
-     * @var integer $eloA
-     */
-    protected $eloA;
-
-    /**
-     * @var integer $eloB
-     */
-    protected $eloB;
-
-    protected $percentA;
-
-    protected $percentB;
-
-    /**
-     * @var EloPlayerInterface $elo1
-     */
-    protected $playerA;
-
-    /**
-     * @var EloPlayerInterface $elo2
-     */
-    protected $playerB;
-
-    /**
-     * @var integer $winner
-     */
-    private $winner;
+    protected $aggregation;
 
     /**
      * Construct
-     *
-     * @param EloPlayerInterface $playerA
-     * @param EloPlayerInterface $playerB
      */
-    public function __construct(EloPlayerInterface $playerA, EloPlayerInterface $playerB)
-    {
-        $this->playerA = $playerA;
-        $this->playerB = $playerB;
+    public function __construct(ConfigurationInterface $configuration, EloAggregationInterface $aggregation) {
+        $this->configuration = $configuration;
+        $this->aggregation = $aggregation;
     }
 
     /**
-     * Get player A
+     * Get configuration
      *
-     * @return EloPlayerInterface
+     * @return ConfigurationInterface $configuration
      */
-    public function getPlayerA()
+    public function getConfiguration()
     {
-        return $this->playerA;
-    }
-
-    /**
-     * Get player B
-     *
-     * @return EloPlayerInterface
-     */
-    public function getPlayerB()
-    {
-        return $this->playerB;
+        return $this->configuration;
     }
 
     /**
      * Estimate experience between player A - player B or player B - player A
      *
-     * @param bool $invert
+     * @param EloPlayerInterface $playerA
+     * @param EloPlayerInterface $playerB
      *
      * @return float
      */
-    private function calculateExperience($invert = false)
+    private function calculateExperience($playerA, $playerB)
     {
-        $difference = $this->playerB->getElo() - $this->playerA->getElo();
-
-        if ($invert) {
-            $difference = $this->playerA->getElo() - $this->playerB->getElo();
-        }
-
+        $difference = $playerB->getElo() - $playerA->getElo();
         $exp = $difference / 400;
 
         return 1/(1 + pow(10, $exp));
     }
 
     /**
-     * Set floor for estimate experience
-     *
-     * @param $floor
-     *
-     * @return $this
-     */
-    public function setFloor($floor)
-    {
-        $this->floor = $floor;
-
-        return $this;
-    }
-
-    /**
-     * Set variant for estimate range
-     *
-     * @param $baseRange
-     *
-     * @return $this
-     */
-    public function setBaseRange($baseRange)
-    {
-        $this->baseRange = $baseRange;
-
-        return $this;
-    }
-
-    /**
      * Get estimate points
      *
-     * @param bool $invert
+     * @param bool $elo
      *
      * @return int
      */
-    private function estimateRange($invert = false)
+    private function estimateRange($elo)
     {
-        $difference = $this->playerA->getElo() + $this->playerB->getElo();
+        $estimatedRange = 80;
 
-        if ($invert) {
-            $difference = $this->playerB->getElo() + $this->playerA->getElo();
+        if ($elo >= 1000 && $elo < 2000) {
+            $estimatedRange = 50;
         }
 
-        $eloRange = ($difference) / 2;
+        if ($elo >= 2000 && $elo <= 2400) {
+            $estimatedRange = 30;
+        }
 
-        $floor = $this->floor;
-        $estimatedRange = $this->baseRange;
-
-        do {
-            $floor += $this->floor;
-            $estimatedRange -= 5;
-        } while ($floor < $eloRange);
+        if ($elo > 2400) {
+            $estimatedRange = 20;
+        }
 
         return $estimatedRange;
     }
 
     /**
-     * Set winner
-     *   - 1 player A win
-     *   - 0 player B win
-     *   - 0,5 draw
-     *
-     * @param integer $winner
-     *
-     * @throws PreconditionFailedHttpException
-     * @return $this
+     * {@inheritdoc}
      */
-    public function setWinner($winner)
+    public function calculate(EloPlayerInterface $playerA, EloPlayerInterface $playerB, $winner)
     {
         if (!in_array($winner, array(0, 0.5, 1))) {
-            throw new PreconditionFailedHttpException(sprintf(
+            throw new \RuntimeException(sprintf(
                 'Invalid parameter, accept 0, 1 or 2, but %s given', $winner
             ));
         }
 
-        $this->winner = $winner;
+        $experienceA = $this->calculateExperience($playerA, $playerB);
+        $experienceB = $this->calculateExperience($playerB, $playerA);
 
-        return $this;
-    }
+        $estimateA = $this->estimateRange($playerA->getElo());
+        $estimateB = $this->estimateRange($playerB->getElo());
 
-    /**
-     * {@inheritdoc}
-     */
-    public function calculate($winner, $scoreA = null, $scoreB = null)
-    {
-        //@todo update parameters, set playerA, playerB and remove it into construct
+        $newEloA = (int) round($playerA->getElo() + $estimateA * ($winner - $experienceA));
+        $newEloB = (int) round($playerB->getElo() + $estimateB * ((1 - $winner) - $experienceB));
 
-        $this->setWinner($winner);
+        $this->aggregation->setWinner($winner);
+        $this->aggregation->setOldEloA($playerA->getElo());
+        $this->aggregation->setOldEloB($playerB->getElo());
+        $this->aggregation->setNewEloA($newEloA);
+        $this->aggregation->setNewEloB($newEloB);
+        $this->aggregation->setDifferenceA($newEloA - $playerA->getElo());
+        $this->aggregation->setDifferenceB($newEloB - $playerB->getElo());
+        $this->aggregation->setPercentA(round($experienceA * 100, 2));
+        $this->aggregation->setPercentB(round($experienceB * 100, 2));
 
-        //@todo add class for calculate exp
-        $experienceA = $this->calculateExperience();
-        $experienceB = $this->calculateExperience(true);
-
-        $this->percentA = round($experienceA * 100, 2);
-        $this->percentB = round($experienceB * 100, 2);
-        /******/
-
-        $estimateA = $this->estimateRange();
-        $estimateB = $this->estimateRange(true);
-
-        $pointsA = (int) round($estimateA * ($this->winner - $experienceA));
-        $pointsB = (int) round($estimateB * ((($this->winner > 0) ? $this->winner * -1 + 2 : 0.5) - $experienceB));
-
-        $this->playerA->setDifference($pointsA);
-        $this->playerB->setDifference($pointsB);
-
-        $this->setNewElo();
-    }
-
-    /**
-     * Calculate new elo
-     *
-     * @return $this
-     */
-    private function setNewElo()
-    {
-        $this->eloA = $this->playerA->getElo() + $this->playerA->getDifference();
-        $this->eloB = $this->playerB->getElo() + $this->playerB->getDifference();
-
-        return $this;
+        return $this->aggregation;
     }
 } 

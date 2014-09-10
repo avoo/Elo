@@ -24,30 +24,31 @@
 * SOFTWARE.
 */
 
-namespace Avoo\Elo\Model;
-
-use Avoo\Elo\Configuration\ConfigurationInterface;
+namespace Avoo\Elo\Configuration;
 
 /**
- * Interface EloInterface
+ * Interface ConfigurationInterface
  */
-interface EloInterface
+interface ConfigurationInterface
 {
     /**
-     * Get configuration
+     * Get floor for estimate experience
      *
-     * @return ConfigurationInterface $configuration
+     * @return integer
      */
-    public function getConfiguration();
+    public function getFloor();
 
     /**
-     * Calculate new elo
+     * Get base elo for new player
      *
-     * @param EloPlayerInterface $playerA
-     * @param EloPlayerInterface $playerB
-     * @param integer            $winner
-     *
-     * @return $this
+     * @return integer
      */
-    public function calculate(EloPlayerInterface $playerA, EloPlayerInterface $playerB, $winner);
-}
+    public function getBaseElo();
+
+    /**
+     * Get variant for estimate range
+     *
+     * @return integer
+     */
+    public function getBaseRange();
+} 
