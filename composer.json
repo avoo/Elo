@@ -1,6 +1,5 @@
 {
     "name": "avoo/elo",
-    "type": "symfony-bundle",
     "description": "Elo calculator library",
     "keywords": ["Elo", "rewards", "competition", "points", "rank"],
     "license": "MIT",
