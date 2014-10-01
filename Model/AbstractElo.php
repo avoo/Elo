@@ -27,6 +27,7 @@
 namespace Avoo\Elo\Model;
 
 use Avoo\Elo\Configuration\ConfigurationInterface;
+use Avoo\Elo\Configuration\Configuration;
 
 /**
  * @author Jérémy Jégou <jejeavo@gmail.com>
@@ -45,8 +46,20 @@ abstract class AbstractElo implements EloInterface
 
     /**
      * Construct
+     *
+     * @param ConfigurationInterface  $configuration
+     * @param EloAggregationInterface $aggregation
      */
-    public function __construct(ConfigurationInterface $configuration, EloAggregationInterface $aggregation) {
+    public function __construct(ConfigurationInterface $configuration = null, EloAggregationInterface $aggregation = null) {
+
+        if (is_null($configuration)) {
+            $configuration = new Configuration();
+        }
+
+        if (is_null($aggregation)) {
+            $aggregation = new EloAggregation();
+        }
+
         $this->configuration = $configuration;
         $this->aggregation = $aggregation;
     }
@@ -110,7 +123,7 @@ abstract class AbstractElo implements EloInterface
     {
         if (!in_array($winner, array(0, 0.5, 1))) {
             throw new \RuntimeException(sprintf(
-                'Invalid parameter, accept 0, 1 or 2, but %s given', $winner
+                'Invalid parameter, accept 0, 0.5 or 1, but %s given', $winner
             ));
         }
 
