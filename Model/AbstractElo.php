@@ -136,7 +136,8 @@ abstract class AbstractElo implements EloInterface
         $newEloA = (int) round($playerA->getElo() + $estimateA * ($winner - $experienceA));
         $newEloB = (int) round($playerB->getElo() + $estimateB * ((1 - $winner) - $experienceB));
 
-        $this->aggregation->setWinner($winner);
+        $this->aggregation->setWinner(($winner === 1) ? $playerA : (($winner === 0) ? $playerB : null));
+        $this->aggregation->setLoser(($winner === 1) ? $playerB : (($winner === 0) ? $playerA : null));
         $this->aggregation->setOldEloA($playerA->getElo());
         $this->aggregation->setOldEloB($playerB->getElo());
         $this->aggregation->setNewEloA($newEloA);

@@ -38,6 +38,11 @@ class EloAggregation implements EloAggregationInterface
     protected $winner = null;
 
     /**
+     * @var null|float $loser
+     */
+    protected $loser = null;
+
+    /**
      * @var null|integer $oldEloA
      */
     protected $oldEloA = null;
@@ -80,7 +85,7 @@ class EloAggregation implements EloAggregationInterface
     /**
      * {@inheritdoc}
      */
-    public function setWinner($winner)
+    public function setWinner(EloPlayerInterface $winner = null)
     {
         $this->winner = $winner;
 
@@ -93,6 +98,24 @@ class EloAggregation implements EloAggregationInterface
     public function getWinner()
     {
         return $this->winner;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setLoser(EloPlayerInterface $loser = null)
+    {
+        $this->loser = $loser;
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getLoser()
+    {
+        return $this->loser;
     }
 
     /**

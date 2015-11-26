@@ -34,16 +34,34 @@ interface EloAggregationInterface
     /**
      * Set winner
      *
-     * @param float $winner
+     * @param EloPlayerInterface $winner
      *
      * @return $this
      */
-    public function setWinner($winner);
+    public function setWinner(EloPlayerInterface $winner = null);
 
     /**
-     * @return float
+     * Get winner
+     *
+     * @return EloPlayerInterface
      */
     public function getWinner();
+
+    /**
+     * Set loser
+     *
+     * @param EloPlayerInterface $loser
+     *
+     * @return $this
+     */
+    public function setLoser(EloPlayerInterface $loser = null);
+
+    /**
+     * Get loser
+     *
+     * @return EloPlayerInterface
+     */
+    public function getLoser();
 
     /**
      * Set old elo from player A
