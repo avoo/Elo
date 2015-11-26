@@ -35,12 +35,17 @@ class Configuration implements ConfigurationInterface
     /**
      * @var integer $floor
      */
-    protected $floor = 500;
+    protected $floor = 400;
 
     /**
-     * @var integer $baseRange
+     * @var array $baseRange
      */
-    protected $baseRange = 50;
+    protected $baseRange = array(
+        0 => 80,
+        1000 => 50,
+        2000 => 30,
+        2400 => 20
+    );
 
     /**
      * @var integer $baseElo
@@ -72,7 +77,7 @@ class Configuration implements ConfigurationInterface
     /**
      * Set variant for estimate range
      *
-     * @param integer $baseRange
+     * @param array $baseRange
      *
      * @return $this
      */

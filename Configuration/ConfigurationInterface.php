@@ -48,7 +48,7 @@ interface ConfigurationInterface
     /**
      * Get variant for estimate range
      *
-     * @return integer
+     * @return array
      */
     public function getBaseRange();
 } 

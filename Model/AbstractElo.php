@@ -28,6 +28,7 @@ namespace Avoo\Elo\Model;
 
 use Avoo\Elo\Configuration\ConfigurationInterface;
 use Avoo\Elo\Configuration\Configuration;
+use Doctrine\Common\Collections\ArrayCollection;
 
 /**
  * @author Jérémy Jégou <jejeavo@gmail.com>
@@ -50,8 +51,8 @@ abstract class AbstractElo implements EloInterface
      * @param ConfigurationInterface  $configuration
      * @param EloAggregationInterface $aggregation
      */
-    public function __construct(ConfigurationInterface $configuration = null, EloAggregationInterface $aggregation = null) {
-
+    public function __construct(ConfigurationInterface $configuration = null, EloAggregationInterface $aggregation = null)
+    {
         if (is_null($configuration)) {
             $configuration = new Configuration();
         }
@@ -85,7 +86,7 @@ abstract class AbstractElo implements EloInterface
     private function calculateExperience($playerA, $playerB)
     {
         $difference = $playerB->getElo() - $playerA->getElo();
-        $exp = $difference / 400;
+        $exp = $difference / $this->configuration->getFloor();
 
         return 1/(1 + pow(10, $exp));
     }
@@ -99,18 +100,23 @@ abstract class AbstractElo implements EloInterface
      */
     private function estimateRange($elo)
     {
-        $estimatedRange = 80;
+        $baseRange = new ArrayCollection($this->configuration->getBaseRange());
+        $keys = array_keys($this->configuration->getBaseRange());
+        $estimatedRange = $baseRange->first();
 
-        if ($elo >= 1000 && $elo < 2000) {
-            $estimatedRange = 50;
-        }
+        $i = 0;
+        foreach ($baseRange as $eloMin => $range) {
+            if (!isset($keys[$i +1]) && $elo > $baseRange->last()) {
+                $estimatedRange = $baseRange->last();
+                break;
+            }
 
-        if ($elo >= 2000 && $elo <= 2400) {
-            $estimatedRange = 30;
-        }
+            if ($elo >= $eloMin && isset($keys[$i +1]) && $elo <= $keys[$i +1]) {
+                $estimatedRange = $range;
+                break;
+            }
 
-        if ($elo > 2400) {
-            $estimatedRange = 20;
+            $i++;
         }
 
         return $estimatedRange;
