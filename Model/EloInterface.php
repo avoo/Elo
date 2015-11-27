@@ -47,7 +47,7 @@ interface EloInterface
      * @param EloPlayerInterface $playerB
      * @param integer            $winner
      *
-     * @return $this
+     * @return EloAggregationInterface
      */
     public function calculate(EloPlayerInterface $playerA, EloPlayerInterface $playerB, $winner);
 }

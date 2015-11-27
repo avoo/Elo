@@ -94,9 +94,9 @@ abstract class AbstractElo implements EloInterface
     /**
      * Get estimate points
      *
-     * @param bool $elo
+     * @param integer $elo
      *
-     * @return int
+     * @return integer
      */
     private function estimateRange($elo)
     {
