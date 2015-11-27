@@ -26,26 +26,72 @@
 
 namespace Avoo\Elo\Model;
 
-use Avoo\Elo\Configuration\ConfigurationInterface;
-
 /**
- * Interface EloInterface
+ * @author Jérémy Jégou <jejeavo@gmail.com>
  */
-interface EloInterface
+interface EloVersusInterface
 {
     /**
-     * Get configuration
+     * Set player A
      *
-     * @return ConfigurationInterface $configuration
+     * @param EloPlayerInterface $playerA
+     *
+     * @return $this
      */
-    public function getConfiguration();
+    public function setPlayerA(EloPlayerInterface $playerA);
 
     /**
-     * Calculate new elo
+     * Get player A
      *
-     * @param EloVersusInterface $match
-     *
-     * @return EloAggregationInterface
+     * @return EloPlayerInterface
      */
-    public function calculate(EloVersusInterface $match);
+    public function getPlayerA();
+
+    /**
+     * Set player B
+     *
+     * @param null|EloPlayerInterface $playerB
+     *
+     * @return $this
+     */
+    public function setPlayerB(EloPlayerInterface $playerB = null);
+
+    /**
+     * Get player B
+     *
+     * @return EloPlayerInterface
+     */
+    public function getPlayerB();
+
+    /**
+     * Set created at
+     *
+     * @param \DateTime $createdAt
+     *
+     * @return $this
+     */
+    public function setCreatedAt(\DateTime $createdAt);
+
+    /**
+     * Get created at
+     *
+     * @return \DateTime
+     */
+    public function getCreatedAt();
+
+    /**
+     * Set winner
+     *
+     * @param float $winner
+     *
+     * @return $this
+     */
+    public function setWinner($winner = null);
+
+    /**
+     * Get winner
+     *
+     * @return float
+     */
+    public function getWinner();
 }

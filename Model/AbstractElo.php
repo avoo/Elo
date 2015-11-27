@@ -46,19 +46,32 @@ abstract class AbstractElo implements EloInterface
     protected $aggregation;
 
     /**
+     * @var EloVersusInterface $match
+     */
+    protected $match;
+
+    /**
      * Construct
      *
      * @param ConfigurationInterface  $configuration
      * @param EloAggregationInterface $aggregation
+     * @param EloVersusInterface      $match
      */
-    public function __construct(ConfigurationInterface $configuration = null, EloAggregationInterface $aggregation = null)
-    {
+    public function __construct(
+        ConfigurationInterface $configuration = null,
+        EloAggregationInterface $aggregation = null,
+        EloVersusInterface $match = null
+    ) {
         if (is_null($configuration)) {
             $configuration = new Configuration();
         }
 
         if (is_null($aggregation)) {
             $aggregation = new EloAggregation();
+        }
+
+        if (!is_null($match)) {
+            $this->setMatch($match);
         }
 
         $this->configuration = $configuration;
@@ -94,11 +107,11 @@ abstract class AbstractElo implements EloInterface
     /**
      * Get estimate points
      *
-     * @param integer $elo
+     * @param EloPlayerInterface $player
      *
      * @return integer
      */
-    private function estimateRange($elo)
+    private function estimateRange(EloPlayerInterface $player)
     {
         $baseRange = new ArrayCollection($this->configuration->getBaseRange());
         $keys = array_keys($this->configuration->getBaseRange());
@@ -106,12 +119,12 @@ abstract class AbstractElo implements EloInterface
 
         $i = 0;
         foreach ($baseRange as $eloMin => $range) {
-            if (!isset($keys[$i +1]) && $elo > $baseRange->last()) {
+            if (!isset($keys[$i +1]) && $player->getElo() > $baseRange->last()) {
                 $estimatedRange = $baseRange->last();
                 break;
             }
 
-            if ($elo >= $eloMin && isset($keys[$i +1]) && $elo <= $keys[$i +1]) {
+            if ($player->getElo() >= $eloMin && isset($keys[$i +1]) && $player->getElo() <= $keys[$i +1]) {
                 $estimatedRange = $range;
                 break;
             }
@@ -125,25 +138,35 @@ abstract class AbstractElo implements EloInterface
     /**
      * {@inheritdoc}
      */
-    public function calculate(EloPlayerInterface $playerA, EloPlayerInterface $playerB, $winner)
+    public function calculate(EloVersusInterface $match = null)
     {
-        if (!in_array($winner, array(0, 0.5, 1))) {
-            throw new \RuntimeException(sprintf(
-                'Invalid parameter, accept 0, 0.5 or 1, but %s given', $winner
-            ));
+        if (!is_null($match)) {
+            $this->setMatch($match);
         }
+
+        if (is_null($this->match)) {
+            throw new \RuntimeException('No match found.');
+        }
+
+        $playerA = $this->match->getPlayerA();
+        $playerB = $this->match->getPlayerB();
+        $winner = $this->match->getWinner();
 
         $experienceA = $this->calculateExperience($playerA, $playerB);
         $experienceB = $this->calculateExperience($playerB, $playerA);
 
-        $estimateA = $this->estimateRange($playerA->getElo());
-        $estimateB = $this->estimateRange($playerB->getElo());
+        $estimateA = $this->estimateRange($playerA);
+        $estimateB = $this->estimateRange($playerB);
 
         $newEloA = (int) round($playerA->getElo() + $estimateA * ($winner - $experienceA));
         $newEloB = (int) round($playerB->getElo() + $estimateB * ((1 - $winner) - $experienceB));
 
-        $this->aggregation->setWinner(($winner === 1) ? $playerA : (($winner === 0) ? $playerB : null));
-        $this->aggregation->setLoser(($winner === 1) ? $playerB : (($winner === 0) ? $playerA : null));
+        $this->aggregation->setWinner(
+            ($winner == 1) ? $playerA : (($winner == 0) ? $playerB : null)
+        );
+        $this->aggregation->setLoser(
+            ($winner == 1) ? $playerB : (($winner == 0) ? $playerA : null)
+        );
         $this->aggregation->setOldEloA($playerA->getElo());
         $this->aggregation->setOldEloB($playerB->getElo());
         $this->aggregation->setNewEloA($newEloA);
@@ -154,5 +177,34 @@ abstract class AbstractElo implements EloInterface
         $this->aggregation->setPercentB(round($experienceB * 100, 2));
 
         return $this->aggregation;
+    }
+
+    /**
+     * Set match
+     *
+     * @param EloVersusInterface $match
+     *
+     * @return $this
+     */
+    private function setMatch(EloVersusInterface $match)
+    {
+        if (!in_array($match->getWinner(), array(0, 0.5, 1))) {
+            throw new \RuntimeException(sprintf(
+                'Invalid parameter, accept 0, 0.5 or 1, but %s given', $match->getWinner()
+            ));
+        }
+
+        if (is_null($match->getPlayerA()) || is_null($match->getPlayerB())) {
+            throw new \RuntimeException('The player A and B must be set.');
+        }
+
+        $this->match = $match;
+
+        return $this;
+    }
+
+    public function save()
+    {
+        var_dump($this->aggregation);die;
     }
 } 

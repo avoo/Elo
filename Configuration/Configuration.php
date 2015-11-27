@@ -35,7 +35,7 @@ class Configuration implements ConfigurationInterface
     /**
      * @var integer $floor
      */
-    protected $floor = 400;
+    protected $floor = 300;
 
     /**
      * @var array $baseRange
