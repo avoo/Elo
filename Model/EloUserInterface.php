@@ -29,26 +29,12 @@ namespace Avoo\Elo\Model;
 /**
  * @author Jérémy Jégou <jejeavo@gmail.com>
  */
-interface EloPlayerInterface
+interface EloUserInterface
 {
     /**
-     * Set elo
+     * Get elo player
      *
-     * @param integer $elo
-     *
-     * @return $this
+     * @return EloPlayerInterface
      */
-    public function setElo($elo);
-
-    /**
-     * Get current elo
-     *
-     * @return integer
-     */
-    public function getElo();
-
-    /**
-     * @return mixed
-     */
-    public function getUser();
-} 
+    public function getEloPlayer();
+}

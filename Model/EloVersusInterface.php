@@ -80,13 +80,29 @@ interface EloVersusInterface
     public function getCreatedAt();
 
     /**
+     * Set ended at
+     *
+     * @param \DateTime $endedAt
+     *
+     * @return $this
+     */
+    public function setEndedAt(\DateTime $endedAt);
+
+    /**
+     * Get ended at
+     *
+     * @return \DateTime
+     */
+    public function getEndedAt();
+
+    /**
      * Set winner
      *
      * @param float $winner
      *
      * @return $this
      */
-    public function setWinner($winner = null);
+    public function setWinner($winner);
 
     /**
      * Get winner

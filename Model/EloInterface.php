@@ -45,7 +45,14 @@ interface EloInterface
      *
      * @param EloVersusInterface $match
      *
-     * @return EloAggregationInterface
+     * @return $this
      */
     public function calculate(EloVersusInterface $match);
+
+    /**
+     * Get aggregation
+     *
+     * @return EloAggregationInterface
+     */
+    public function getAggregation();
 }

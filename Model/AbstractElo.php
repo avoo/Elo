@@ -29,6 +29,7 @@ namespace Avoo\Elo\Model;
 use Avoo\Elo\Configuration\ConfigurationInterface;
 use Avoo\Elo\Configuration\Configuration;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\EntityManager;
 
 /**
  * @author Jérémy Jégou <jejeavo@gmail.com>
@@ -136,6 +137,34 @@ abstract class AbstractElo implements EloInterface
     }
 
     /**
+     * Set match
+     *
+     * @param EloVersusInterface $match
+     *
+     * @return $this
+     */
+    private function setMatch(EloVersusInterface $match)
+    {
+        if (!in_array($match->getWinner(), array(0, 0.5, 1))) {
+            throw new \RuntimeException(sprintf(
+                'Invalid parameter, accept 0, 0.5 or 1, but %s given', $match->getWinner()
+            ));
+        }
+
+        if (is_null($match->getPlayerA()) || is_null($match->getPlayerB())) {
+            throw new \RuntimeException('The players A and B must be set.');
+        }
+
+        if ($match->getPlayerA()->getUser()->getId() == $match->getPlayerB()->getUser()->getId()) {
+            throw new \RuntimeException('The players A and B are the same.');
+        }
+
+        $this->match = $match;
+
+        return $this;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function calculate(EloVersusInterface $match = null)
@@ -176,35 +205,16 @@ abstract class AbstractElo implements EloInterface
         $this->aggregation->setPercentA(round($experienceA * 100, 2));
         $this->aggregation->setPercentB(round($experienceB * 100, 2));
 
-        return $this->aggregation;
-    }
-
-    /**
-     * Set match
-     *
-     * @param EloVersusInterface $match
-     *
-     * @return $this
-     */
-    private function setMatch(EloVersusInterface $match)
-    {
-        if (!in_array($match->getWinner(), array(0, 0.5, 1))) {
-            throw new \RuntimeException(sprintf(
-                'Invalid parameter, accept 0, 0.5 or 1, but %s given', $match->getWinner()
-            ));
-        }
-
-        if (is_null($match->getPlayerA()) || is_null($match->getPlayerB())) {
-            throw new \RuntimeException('The player A and B must be set.');
-        }
-
-        $this->match = $match;
-
         return $this;
     }
 
-    public function save()
+    /**
+     * Get aggregation
+     *
+     * @return EloAggregationInterface
+     */
+    public function getAggregation()
     {
-        var_dump($this->aggregation);die;
+        return $this->aggregation;
     }
 } 
