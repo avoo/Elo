@@ -161,4 +161,7 @@ $configuration->setBaseElo(1000);
 /** @var EloVersusInterface $match */
 $eloCalculator = new EloPoint($match, $configuration);
 $eloPoint->calculate();
+
+/** @var EloAggregationInterface $aggregation */
+$aggregation = $eloPoint->getAggregation();
 ```
