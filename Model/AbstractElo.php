@@ -29,7 +29,6 @@ namespace Avoo\Elo\Model;
 use Avoo\Elo\Configuration\ConfigurationInterface;
 use Avoo\Elo\Configuration\Configuration;
 use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\ORM\EntityManager;
 
 /**
  * @author Jérémy Jégou <jejeavo@gmail.com>
@@ -54,25 +53,25 @@ abstract class AbstractElo implements EloInterface
     /**
      * Construct
      *
+     * @param EloVersusInterface      $match
      * @param ConfigurationInterface  $configuration
      * @param EloAggregationInterface $aggregation
-     * @param EloVersusInterface      $match
      */
     public function __construct(
+        EloVersusInterface $match = null,
         ConfigurationInterface $configuration = null,
-        EloAggregationInterface $aggregation = null,
-        EloVersusInterface $match = null
+        EloAggregationInterface $aggregation = null
     ) {
+        if (!is_null($match)) {
+            $this->setMatch($match);
+        }
+
         if (is_null($configuration)) {
             $configuration = new Configuration();
         }
 
         if (is_null($aggregation)) {
             $aggregation = new EloAggregation();
-        }
-
-        if (!is_null($match)) {
-            $this->setMatch($match);
         }
 
         $this->configuration = $configuration;

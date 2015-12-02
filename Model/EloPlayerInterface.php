@@ -48,7 +48,16 @@ interface EloPlayerInterface
     public function getElo();
 
     /**
-     * @return mixed
+     * Set user
+     *
+     * @param EloUserInterface $user
+     *
+     * @return $this
+     */
+    public function setUser(EloUserInterface $user);
+
+    /**
+     * @return EloUserInterface
      */
     public function getUser();
 } 
