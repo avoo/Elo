@@ -34,7 +34,7 @@ interface EloAggregationInterface
     /**
      * Set winner
      *
-     * @param EloPlayerInterface $winner
+     * @param null|EloPlayerInterface $winner
      *
      * @return $this
      */
@@ -50,7 +50,7 @@ interface EloAggregationInterface
     /**
      * Set loser
      *
-     * @param EloPlayerInterface $loser
+     * @param null|EloPlayerInterface $loser
      *
      * @return $this
      */

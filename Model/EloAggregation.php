@@ -33,12 +33,12 @@ namespace Avoo\Elo\Model;
 class EloAggregation implements EloAggregationInterface
 {
     /**
-     * @var null|float $winner
+     * @var null|EloPlayerInterface $winner
      */
     protected $winner = null;
 
     /**
-     * @var null|float $loser
+     * @var null|EloPlayerInterface $loser
      */
     protected $loser = null;
 
